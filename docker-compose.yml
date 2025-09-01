@@ -1,16 +1,18 @@
+version: "3.9"
+
 services:
-  postgres:
+  db:
     image: postgres:15
-    container_name: sso_database
-    restart: unless-stopped
+    container_name: sso
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin123
+      POSTGRES_USER: sso
+      POSTGRES_PASSWORD: sso
       POSTGRES_DB: sso
     ports:
-      - "5432:5432"
+      - "5431:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
 
 volumes:
-  postgres_data:
+  pgdata:

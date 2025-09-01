@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { LoginModule } from './login/login.module';
+import { LoginModule } from '../modules/login/login.module';
 import { ConfigModule } from '@nestjs/config';
-import { envSchema } from './lib/env.schema';
+import { envSchema } from '../lib/env.schema';
+import { ClientModule } from '../modules/client/client.module';
 
 @Module({
   imports: [
@@ -19,6 +20,8 @@ import { envSchema } from './lib/env.schema';
         return parsed.data;
       },
     }),
+    AppModule,
+    ClientModule,
   ],
   controllers: [AppController],
   providers: [AppService],
