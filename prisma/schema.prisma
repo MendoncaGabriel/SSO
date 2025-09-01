@@ -8,9 +8,64 @@ datasource db {
 }
 
 model Client {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  url       String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String       @id @default(uuid())
+  name        String       @unique
+  url         String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  permissions Permission[]
+}
+
+model Permission {
+  id        String            @id @default(uuid())
+  name      String            // ex: admin, manager, viewer
+  clientId  String
+  client    Client            @relation(fields: [clientId], references: [id])
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  roles     Role[]
+  users     UserPermission[]
+}
+
+model Role {
+  id           String      @id @default(uuid())
+  action       String      // ex: "read", "write", "delete"
+  resource     String      // ex: "user", "invoice"
+  permissionId String
+  permission   Permission  @relation(fields: [permissionId], references: [id])
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model User {
+  id           String     @id @default(uuid())
+  firstName    String
+  lastName     String
+  displayName  String
+  fullName     String
+  department   String
+  email        String     @unique
+  title        String
+  workCell     String?
+  manager      String
+  employeeNum  String
+  costCenter   String
+  location     String
+  status       String
+  memberGroups String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  permissions UserPermission[]
+}
+
+model UserPermission {
+  userId       String
+  permissionId String
+  user         User       @relation(fields: [userId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([userId, permissionId])
 }

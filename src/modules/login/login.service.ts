@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class LoginService {
   constructor(private readonly config: ConfigService) {}
+  
   async login(
     {login, password}:
     {login: number, password: string}

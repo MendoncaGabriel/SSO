@@ -12,20 +12,3 @@ export class LoginDTO {
   @Length(6, 32, { message: "A senha deve ter entre 6 e 32 caracteres" })
   password: string;
 }
-
-export class UserAdResponse {
-  firstName: string;
-  lastName: string;
-  displayName: string;
-  fullName: string;
-  department: string;
-  email: string;
-  title: string;
-  workCell: string | null;
-  manager: string;
-  employeeNum: string;
-  costCenter: string;
-  location: string;
-  status: string;
-  memberGroups: string | null;
-}
