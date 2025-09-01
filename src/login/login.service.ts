@@ -9,7 +9,7 @@ export class LoginService {
   constructor(private readonly config: ConfigService) {}
   async login(
     {login, password}:
-    {login: string, password: string}
+    {login: number, password: string}
   ){
     const API_AD = this.config.get<string>("API_AD")!;
     const JWT_SECRET = this.config.get<string>("JWT_SECRET")!;
