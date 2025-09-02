@@ -33,7 +33,7 @@ export class PermissionService {
   }
 
   async getById(id: string){
-    const permission = await db.permission.findFirst({
+    const permission = await db.permission.findUnique({
       where: {
         id
       }
@@ -49,10 +49,23 @@ export class PermissionService {
     if(!permissionExists){
       throw new NotFoundException("Permission not found")
     }
+
     const relatedRules = await db.role.count();
     if(relatedRules !== 0){
       throw new ConflictException("There are rules related to this permission, delete the roles first before deleting this permission")
     }
+
+    const relatedUserPermissions = await db.userPermission.count({
+      where: { permissionId: id }
+    });
+
+    if (relatedUserPermissions > 0) {
+      throw new ConflictException(
+        "There are users related to this permission, remove them first before deleting this permission"
+      );
+    }
+
+
     const permission = await db.permission.delete({
       where: {
         id
