@@ -1,69 +1,41 @@
-import { NotFoundException, ConflictException, Controller } from '@nestjs/common';
+import { NotFoundException, Controller, Get, Post, Param, Patch, Body, Delete } from '@nestjs/common';
 import { CreateClientDTO } from './dto/create.client';
-import { db } from 'src/lib/prisma';
 import { UpdateClientDTO } from './dto/update.client';
 import { FindClientByIdDTO } from './dto/findById.client';
 import { DeleteClientByIdDTO } from './dto/deleteclient';
+import { ClientService } from './client.service';
 
 @Controller('client')
 export class ClientController {
-  async create(data: CreateClientDTO) {
-    const [clientName, clientUrl] = await Promise.all([
-      db.client.findFirst({ where: { name: data.name } }),
-      db.client.findFirst({ where: { url: data.url } }),
-    ]);
+  constructor(
+    private readonly clientService: ClientService
+  ){}
 
-    if (clientName) {
-      throw new ConflictException('Cliente com nome já existe');
-    }
-    if (clientUrl) {
-      throw new ConflictException('Cliente com URL já existe');
-    }
-
-    const client = await db.client.create({ data });
-    return { client };
+  @Post()
+  async create(@Body() data: CreateClientDTO) {
+    return await this.clientService.create(data);
   }
 
+  @Get()
   async list() {
-    const clients = await db.client.findMany();
-    return { clients };
+    return await this.clientService.list();
   }
 
-  async findById({ id }: FindClientByIdDTO) {
-    const client = await db.client.findUnique({ where: { id } });
-    if (!client) {
-      throw new NotFoundException(`Cliente com id ${id} não encontrado`);
-    }
-    return { client };
+  @Get(":id")
+  async findById(@Param() {id}: {id: string}) {
+    return await this.clientService.findById(id);
   }
 
-  async update({ id }: FindClientByIdDTO, { name, url }: UpdateClientDTO) {
-    try {
-      const client = await db.client.update({
-        where: { id },
-        data: {
-          ...(url ? { url } : {}),
-          ...(name ? { name } : {}),
-        },
-      });
-      return { client };
-    } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException(`Cliente com id ${id} não encontrado`);
-      }
-      throw error;
-    }
+  @Patch(":id")
+  async update(
+    @Param() { id }: FindClientByIdDTO, 
+    @Body() data: UpdateClientDTO
+  ) {
+    return this.clientService.update(id, data)
   }
 
-  async delete({ id }: DeleteClientByIdDTO) {
-    try {
-      const client = await db.client.delete({ where: { id } });
-      return { client };
-    } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException(`Cliente com id ${id} não encontrado`);
-      }
-      throw error;
-    }
+  @Delete(":id")
+  async delete(@Param() { id }: DeleteClientByIdDTO) {
+    return await this.clientService.delete(id)
   }
 }
