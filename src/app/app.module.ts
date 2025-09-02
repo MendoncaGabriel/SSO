@@ -5,10 +5,10 @@ import { LoginModule } from '../modules/login/login.module';
 import { ConfigModule } from '@nestjs/config';
 import { envSchema } from '../lib/env.schema';
 import { ClientModule } from '../modules/client/client.module';
+import { UserModule } from 'src/modules/user/user.module';
 
 @Module({
   imports: [
-    LoginModule,
     ConfigModule.forRoot({
       isGlobal: true,
       validate: (env) => {
@@ -20,8 +20,10 @@ import { ClientModule } from '../modules/client/client.module';
         return parsed.data;
       },
     }),
+    LoginModule,
     AppModule,
     ClientModule,
+    UserModule
   ],
   controllers: [AppController],
   providers: [AppService],

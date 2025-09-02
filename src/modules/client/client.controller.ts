@@ -1,12 +1,12 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { NotFoundException, ConflictException, Controller } from '@nestjs/common';
 import { CreateClientDTO } from './dto/create.client';
 import { db } from 'src/lib/prisma';
 import { UpdateClientDTO } from './dto/update.client';
 import { FindClientByIdDTO } from './dto/findById.client';
 import { DeleteClientByIdDTO } from './dto/deleteclient';
 
-@Injectable()
-export class ClientService {
+@Controller('client')
+export class ClientController {
   async create(data: CreateClientDTO) {
     const [clientName, clientUrl] = await Promise.all([
       db.client.findFirst({ where: { name: data.name } }),

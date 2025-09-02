@@ -8,7 +8,9 @@ export class LoginController {
   constructor(private readonly loginService: LoginService) {}
 
   @Post()
-  login(@Body() body: LoginDTO): Promise<{ user: UserAd | null, token: string }> {
+  login(
+    @Body() body: LoginDTO
+  ): Promise<{ user: UserAd | null, token: string }> {
     return this.loginService.login(body);
   }
 }

@@ -1,11 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { db } from 'src/lib/prisma';
+import { CreateUserDTO } from '../login/dto/create.user.dto';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly config: ConfigService) {}
-  
   async findByLogin(login: string){
     const user = await db.user.findFirst({
       where: {
@@ -23,6 +21,13 @@ export class UserService {
       }
     })
 
+    return {user}
+  }
+
+  async create(data: CreateUserDTO){
+    const user = await db.user.create({
+      data
+    })
     return {user}
   }
 }
