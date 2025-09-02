@@ -107,4 +107,37 @@ export class PermissionService {
 
     return { permission }
   }
+
+  async getByUserIdAndClientId(userId: string, clientId: string){
+    const user = await db.user.findUnique({
+      where: {
+        id: userId
+      }
+    })
+    if(!user){
+      throw new NotFoundException("User not found")
+    }
+
+    const client = await db.client.findUnique({
+      where: {
+        id: clientId
+      }
+    })
+    if(!client){
+      throw new NotFoundException("client not found")
+    }
+
+    const permission = await db.userPermission.findFirst({
+      where: {
+        userId,
+        permission: {
+          clientId
+        }
+      }
+    })
+    if(!permission){
+      throw new NotFoundException("permission not found")
+    }
+    return { permission }
+  }
 }

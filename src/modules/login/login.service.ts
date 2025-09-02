@@ -4,17 +4,18 @@ import { UserAd } from 'src/@types/user';
 import jwt from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '../user/user.service';
+import { db } from 'src/lib/prisma';
 
 @Injectable()
 export class LoginService {
   constructor(
     private readonly config: ConfigService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
   ) {}
 
   async login(
-    {login, password}:
-    {login: string, password: string}
+    {login, password, clientId}:
+    {login: string, password: string, clientId: string}
   ){
     const API_AD = this.config.get<string>("API_AD")!;
     const JWT_SECRET = this.config.get<string>("JWT_SECRET")!;
@@ -24,19 +25,41 @@ export class LoginService {
       password
     });  
 
-    if(data){ //Verificar no SSO se usuario exist, se não existir registra automaticamente mas sem permissions
-      const {user} = await this.userService.findByLogin(login);
-      if(!user) {
-        await this.userService.create(data);
-      }
-    }
+    const {user} = await this.userService.findByLogin(login);
+    const userRoles: string[] = []
 
-    // buscar aplicações que este usuario tem acesso
-    // buscar roles para cada app que este usuario tem
-    const payload = {roles: ["admin"]}
+    if(user){
+      const roles = await db.role.findMany({
+        where: {
+          permission: {
+            clientId,
+            users: {
+              some: {
+                userId: user.id
+              }
+            }
+          }
+        },
+        select: {
+          action: true,
+          resource: true,
+        }
+      })
+
+      for(const role of roles){
+        const keyRole = `${role.action}:${role.resource}`
+        userRoles.push(keyRole)
+      }
+
+    } else if(!user && data) {
+      await this.userService.create(data);
+    }
+  
+
+    const payload = {roles: userRoles}
 
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '30d' });
 
-    return { user: data, token }
+    return { user, token, roles: userRoles }
   }
 }
