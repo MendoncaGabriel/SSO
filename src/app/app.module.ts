@@ -6,6 +6,9 @@ import { ConfigModule } from '@nestjs/config';
 import { envSchema } from '../lib/env.schema';
 import { ClientModule } from '../modules/client/client.module';
 import { UserModule } from 'src/modules/user/user.module';
+import { PermissionModule } from 'src/modules/permission/permission.module';
+import { RoleModule } from 'src/modules/role/role.module';
+import { UserPermissionModule } from 'src/modules/user-permission/user-permission.module';
 
 @Module({
   imports: [
@@ -20,10 +23,13 @@ import { UserModule } from 'src/modules/user/user.module';
         return parsed.data;
       },
     }),
-    LoginModule,
     AppModule,
     ClientModule,
-    UserModule
+    LoginModule,
+    PermissionModule,
+    RoleModule,
+    UserModule,
+    UserPermissionModule
   ],
   controllers: [AppController],
   providers: [AppService],
