@@ -11,6 +11,11 @@ export class UserPermissionController {
     return await this.userPermissionService.create(data)
   }
 
+  @Get()
+  async list(){
+    return await this.userPermissionService.list();
+  }
+
   @Get("/user/:userId")
   async listByUserId(@Param() {userId}: {userId: string}){
     return await this.userPermissionService.listByUserId(userId)

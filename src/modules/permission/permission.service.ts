@@ -1,22 +1,20 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePermissionDTO } from './dto/create.permission.dto';
 import { db } from 'src/lib/prisma';
+import { UpdatePermissionDTO } from './dto/update.permission.dto';
 
 @Injectable()
 export class PermissionService {
   async create(data: CreatePermissionDTO){
-    const { permissions } = await this.listByClientId(data.clientId);
-    if(!permissions ||  permissions.length === 0){
-      throw new NotFoundException("Permission not found")
-    }
-    const exists = permissions.some(
+    const permissionsAlreadyExists  = await this.listByClientId(data.clientId);
+    const exists = permissionsAlreadyExists.permissions.some(
       (e) => e.clientId === data.clientId && e.name === data.name,
     );
-
     if (exists) {
       throw new ConflictException('Permission already exists');
     }
-
+    
+    
     const permission = await db.permission.create({
       data
     })
@@ -71,6 +69,42 @@ export class PermissionService {
         id
       }
     })
+    return { permission }
+  }
+
+  async update(id: string, data: UpdatePermissionDTO){
+    const permissionExists = await db.permission.findUnique({
+      where: {
+        id
+      }
+    })
+
+    const checkNameAndClientId = await db.permission.findFirst({
+      where: {
+        AND: {
+          name: data.name,
+          clientId: data.clientId
+        }
+      }
+    })
+    if(checkNameAndClientId){
+      throw new ConflictException("Permission already exists")
+    }
+
+    if(!permissionExists){
+      throw new NotFoundException("Permission not found")
+    }
+
+    const permission = await db.permission.update({
+      where: {
+        id
+      },
+      data: {
+        ...(data.clientId ? {clientId: data.clientId} : {}),
+        ...(data.name ? {name: data.name} : {})
+      }
+    })
+
     return { permission }
   }
 }

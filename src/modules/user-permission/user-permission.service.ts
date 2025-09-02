@@ -29,13 +29,18 @@ export class UserPermissionService {
       }
     })
 
-    if(userPermissionAlreadExists){
+    if(userPermissionAlreadExists.length !== 0){
       throw new ConflictException("There is already a user permission with this userId and this permissionId")
     }
 
     const userPermission = await db.userPermission.create({
       data
     })
+    return { userPermission }
+  }
+
+  async list(){
+    const userPermission = await db.userPermission.findMany();
     return { userPermission }
   }
 
