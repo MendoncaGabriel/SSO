@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateRoleDTO } from './dto/create.role.dto';
 import { db } from 'src/lib/prisma';
 import { UpdateRoleDTO } from './dto/update.role.dto';
@@ -27,21 +27,44 @@ export class RoleService {
     return { role }
   }
 
-  async delete(id: string){
-    const role = await db.role.delete({
-      where: {
-        id
-      }
-    })
-    return { role }
+  async getById(id: string) {
+    const role = await db.role.findUnique({
+      where: { id }
+    });
+
+    return { role };
   }
 
+  async delete(id: string) {
+    const _role = await this.getById(id);
+    if (!_role.role) {
+      throw new NotFoundException("Role not found");
+    }
+
+    const role = await db.role.delete({
+      where: { id }
+    });
+
+    return { role };
+}
+
   async listByPermissionId(permissionId: string){
+    const permission = await db.permission.findUnique({
+      where: {
+        id: permissionId
+      }
+    })
+    if(!permission){
+      throw new NotFoundException("Permission not found")
+    }
     const roles = await db.role.findMany({
       where: {
         permissionId
       }
     })
+    if(!roles || roles.length === 0){
+      throw new NotFoundException("Roles not found")
+    }
 
     return { roles }
   }
