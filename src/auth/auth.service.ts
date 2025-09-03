@@ -5,10 +5,10 @@ import { UserService } from '../user/user.service';
 import { EnvService } from '../env/env.service';
 import { LoginDTO } from './dto/login.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UserAd } from 'src/login/@types/user';
+import { UserAd } from './@types/user';
 
 @Injectable()
-export class LoginService {
+export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly db: PrismaService,
