@@ -1,4 +1,4 @@
-import { NotFoundException, Controller, Get, Post, Param, Patch, Body, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Param, Patch, Body, Delete } from '@nestjs/common';
 import { CreateClientDTO } from './dto/create.client';
 import { UpdateClientDTO } from './dto/update.client';
 import { FindClientByIdDTO } from './dto/findById.client';

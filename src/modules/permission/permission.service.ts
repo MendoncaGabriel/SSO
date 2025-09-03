@@ -1,10 +1,14 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePermissionDTO } from './dto/create.permission.dto';
-import { db } from 'src/lib/prisma';
 import { UpdatePermissionDTO } from './dto/update.permission.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class PermissionService {
+  constructor(
+    private readonly db: PrismaService
+  ){}
+
   async create(data: CreatePermissionDTO){
     const permissionsAlreadyExists  = await this.listByClientId(data.clientId);
     const exists = permissionsAlreadyExists.permissions.some(
@@ -15,14 +19,14 @@ export class PermissionService {
     }
     
     
-    const permission = await db.permission.create({
+    const permission = await this.db.permission.create({
       data
     })
     return { permission }
   }
 
   async listByClientId(clientId: string){
-    const permissions = await db.permission.findMany({
+    const permissions = await this.db.permission.findMany({
       where: {
         clientId
       }
@@ -31,7 +35,7 @@ export class PermissionService {
   }
 
   async getById(id: string){
-    const permission = await db.permission.findUnique({
+    const permission = await this.db.permission.findUnique({
       where: {
         id
       }
@@ -48,12 +52,12 @@ export class PermissionService {
       throw new NotFoundException("Permission not found")
     }
 
-    const relatedRules = await db.role.count();
+    const relatedRules = await this.db.role.count();
     if(relatedRules !== 0){
       throw new ConflictException("There are rules related to this permission, delete the roles first before deleting this permission")
     }
 
-    const relatedUserPermissions = await db.userPermission.count({
+    const relatedUserPermissions = await this.db.userPermission.count({
       where: { permissionId: id }
     });
 
@@ -64,7 +68,7 @@ export class PermissionService {
     }
 
 
-    const permission = await db.permission.delete({
+    const permission = await this.db.permission.delete({
       where: {
         id
       }
@@ -73,13 +77,13 @@ export class PermissionService {
   }
 
   async update(id: string, data: UpdatePermissionDTO){
-    const permissionExists = await db.permission.findUnique({
+    const permissionExists = await this.db.permission.findUnique({
       where: {
         id
       }
     })
 
-    const checkNameAndClientId = await db.permission.findFirst({
+    const checkNameAndClientId = await this.db.permission.findFirst({
       where: {
         AND: {
           name: data.name,
@@ -95,7 +99,7 @@ export class PermissionService {
       throw new NotFoundException("Permission not found")
     }
 
-    const permission = await db.permission.update({
+    const permission = await this.db.permission.update({
       where: {
         id
       },
@@ -109,7 +113,7 @@ export class PermissionService {
   }
 
   async getByUserIdAndClientId(userId: string, clientId: string){
-    const user = await db.user.findUnique({
+    const user = await this.db.user.findUnique({
       where: {
         id: userId
       }
@@ -118,7 +122,7 @@ export class PermissionService {
       throw new NotFoundException("User not found")
     }
 
-    const client = await db.client.findUnique({
+    const client = await this.db.client.findUnique({
       where: {
         id: clientId
       }
@@ -127,7 +131,7 @@ export class PermissionService {
       throw new NotFoundException("client not found")
     }
 
-    const permission = await db.userPermission.findFirst({
+    const permission = await this.db.userPermission.findFirst({
       where: {
         userId,
         permission: {

@@ -1,4 +1,4 @@
-import { Body, ConflictException, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { RoleService } from './role.service';
 import { CreateRoleDTO } from './dto/create.role.dto';
 import { UpdateRoleDTO } from './dto/update.role.dto';

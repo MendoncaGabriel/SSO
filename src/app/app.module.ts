@@ -9,6 +9,7 @@ import { UserModule } from 'src/modules/user/user.module';
 import { PermissionModule } from 'src/modules/permission/permission.module';
 import { RoleModule } from 'src/modules/role/role.module';
 import { UserPermissionModule } from 'src/modules/user-permission/user-permission.module';
+import { PrismaModule } from 'src/modules/prisma/prisma.module';
 
 @Module({
   imports: [
@@ -29,7 +30,8 @@ import { UserPermissionModule } from 'src/modules/user-permission/user-permissio
     PermissionModule,
     RoleModule,
     UserModule,
-    UserPermissionModule
+    UserPermissionModule,
+    PrismaModule
   ],
   controllers: [AppController],
   providers: [AppService],

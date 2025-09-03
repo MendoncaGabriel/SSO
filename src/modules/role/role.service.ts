@@ -1,10 +1,14 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateRoleDTO } from './dto/create.role.dto';
-import { db } from 'src/lib/prisma';
 import { UpdateRoleDTO } from './dto/update.role.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class RoleService {
+  constructor(
+    private readonly db: PrismaService 
+  ){}
+
   async create(data: CreateRoleDTO) {
     const { roles } = await this.listByPermissionId(data.permissionId);
 
@@ -18,14 +22,14 @@ export class RoleService {
       throw new ConflictException("This role already exists")
     }
 
-    const role = await db.role.create({
+    const role = await this.db.role.create({
       data
     })
     return { role }
   }
 
   async update(id: string, data: UpdateRoleDTO) {
-    const role = await db.role.update({
+    const role = await this.db.role.update({
       where: {
         id
       },
@@ -40,7 +44,7 @@ export class RoleService {
   }
 
   async getById(id: string) {
-    const role = await db.role.findUnique({
+    const role = await this.db.role.findUnique({
       where: { id }
     });
 
@@ -53,7 +57,7 @@ export class RoleService {
       throw new NotFoundException("Role not found");
     }
 
-    const role = await db.role.delete({
+    const role = await this.db.role.delete({
       where: { id }
     });
 
@@ -61,7 +65,7 @@ export class RoleService {
   }
 
   async listByPermissionId(permissionId: string) {
-    const permission = await db.permission.findUnique({
+    const permission = await this.db.permission.findUnique({
       where: {
         id: permissionId
       }
@@ -69,7 +73,7 @@ export class RoleService {
     if (!permission) {
       throw new NotFoundException("Permission not found")
     }
-    const roles = await db.role.findMany({
+    const roles = await this.db.role.findMany({
       where: {
         permissionId
       }

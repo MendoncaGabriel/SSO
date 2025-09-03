@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { db } from 'src/lib/prisma';
 import { CreateUserDTO } from '../login/dto/create.user.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class UserService {
+  constructor(
+    private readonly db: PrismaService
+  ){}
+
   async findByLogin(login: string){
-    const user = await db.user.findFirst({
+    const user = await this.db.user.findFirst({
       where: {
         employeeNum: login
       } 
@@ -15,7 +19,7 @@ export class UserService {
   }
 
   async delete(id: string){
-    const user = await db.user.delete({
+    const user = await this.db.user.delete({
       where: {
         id
       }
@@ -25,7 +29,7 @@ export class UserService {
   }
 
   async create(data: CreateUserDTO){
-    const user = await db.user.create({
+    const user = await this.db.user.create({
       data
     })
     return {user}

@@ -4,13 +4,14 @@ import { UserAd } from 'src/@types/user';
 import jwt from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '../user/user.service';
-import { db } from 'src/lib/prisma';
+import { PrismaService } from 'src/modules/prisma/prisma.service';
 
 @Injectable()
 export class LoginService {
   constructor(
     private readonly config: ConfigService,
     private readonly userService: UserService,
+    private readonly db: PrismaService
   ) {}
 
   async login(
@@ -29,7 +30,7 @@ export class LoginService {
     const userRoles: string[] = []
 
     if(user){
-      const roles = await db.role.findMany({
+      const roles = await this.db.role.findMany({
         where: {
           permission: {
             clientId,

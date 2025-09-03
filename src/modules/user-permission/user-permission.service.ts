@@ -1,11 +1,15 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserPermissionDTO } from './dto/create.user-permission.dto';
-import { db } from 'src/lib/prisma';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class UserPermissionService {
+  constructor(
+    private readonly db: PrismaService
+  ){}
+  
   async create(data: CreateUserPermissionDTO){
-    const user = await db.user.findUnique({
+    const user = await this.db.user.findUnique({
       where: {
         id: data.userId
       }
@@ -13,7 +17,7 @@ export class UserPermissionService {
     if(!user){
       throw new NotFoundException("User not found")
     }
-    const permission = await db.permission.findUnique({
+    const permission = await this.db.permission.findUnique({
       where: {
         id: data.permissionId
       }
@@ -22,7 +26,7 @@ export class UserPermissionService {
       throw new NotFoundException("Permission not found")
     }
     
-    const userPermissionAlreadExists = await db.userPermission.findMany({
+    const userPermissionAlreadExists = await this.db.userPermission.findMany({
       where: {
         userId: data.userId,
         permissionId: data.permissionId
@@ -33,19 +37,19 @@ export class UserPermissionService {
       throw new ConflictException("There is already a user permission with this userId and this permissionId")
     }
 
-    const userPermission = await db.userPermission.create({
+    const userPermission = await this.db.userPermission.create({
       data
     })
     return { userPermission }
   }
 
   async list(){
-    const userPermission = await db.userPermission.findMany();
+    const userPermission = await this.db.userPermission.findMany();
     return { userPermission }
   }
 
   async listByUserId(userId: string){
-    const user = await db.user.findUnique({
+    const user = await this.db.user.findUnique({
       where: {
         id: userId
       }
@@ -53,7 +57,7 @@ export class UserPermissionService {
     if(!user){
       throw new NotFoundException("User not found")
     }
-    const userPermissions = await db.userPermission.findMany({
+    const userPermissions = await this.db.userPermission.findMany({
       where: {
         userId
       }
@@ -66,7 +70,7 @@ export class UserPermissionService {
   }
 
   async delete(userId: string, permissionId: string){
-    const user = await db.user.findUnique({
+    const user = await this.db.user.findUnique({
       where: {
         id: userId
       }
@@ -75,7 +79,7 @@ export class UserPermissionService {
       throw new NotFoundException("User not found")
     }
 
-    const permission = await db.permission.findUnique({
+    const permission = await this.db.permission.findUnique({
       where: {
         id: permissionId
       }
@@ -84,7 +88,7 @@ export class UserPermissionService {
       throw new NotFoundException("Permission not found")
     }
 
-    const userPermission = await db.userPermission.findUnique({
+    const userPermission = await this.db.userPermission.findUnique({
       where: {
         userId_permissionId: {
           userId, permissionId
@@ -95,7 +99,7 @@ export class UserPermissionService {
       throw new NotFoundException("UserPermission not found")
     }
 
-    await db.userPermission.delete({
+    await this.db.userPermission.delete({
       where: {
         userId_permissionId: {
           userId,
