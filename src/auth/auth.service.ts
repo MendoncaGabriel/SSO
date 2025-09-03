@@ -48,7 +48,7 @@ export class AuthService {
     }
 
     // Login via AD
-    const { data } = await axios.post<UserAd | null>(API_AD, { username: login, password });
+    const { data } = await axios.post<UserAd | null>(API_AD, { userName: login, password });
 
     const result = await this.userService.findByLogin(login);
     let user = result?.user ?? null;
