@@ -30,15 +30,15 @@ export class AuthService {
   }
 
   async login({ login, password, clientId }: LoginDTO) {
-    const { API_AD, JWT_SECRET, PASSWORD_ADMIN } = this.env.getAll();
+    const { API_AD, JWT_SECRET, PASSWORD_ADMIN, LOGIN_ADMIN } = this.env.getAll();
 
     // Login admin local
-    if (login === 'admin') {
+    if (login === LOGIN_ADMIN) {
       if (password !== PASSWORD_ADMIN) {
         throw new UnauthorizedException('invalid login or password');
       }
 
-      const userAdmin = await this.db.user.findFirst({ where: { firstName: 'admin' } });
+      const userAdmin = await this.db.user.findFirst({ where: { firstName: LOGIN_ADMIN } });
       if (!userAdmin) throw new UnauthorizedException('Admin user not found');
 
       const adminRoles = await this.getRoles(userAdmin.id, clientId);

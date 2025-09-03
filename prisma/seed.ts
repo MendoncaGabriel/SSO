@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import "dotenv/config";
 
 const db = new PrismaClient();
 
@@ -33,6 +34,7 @@ async function main() {
     skipDuplicates: true,
   });
 
+  const LOGIN_ADMIN = process.env.LOGIN_ADMIN as string;
   const user = await db.user.create({
     data: {
       costCenter: "",
@@ -40,7 +42,7 @@ async function main() {
       displayName: "",
       email: "",
       employeeNum: "",
-      firstName: "admin",
+      firstName: LOGIN_ADMIN,
       fullName: "",
       lastName: "",
       location: "",
