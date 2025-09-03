@@ -9,6 +9,7 @@ export const envSchema = z.object({
   DATABASE_URL: z.string(),
   PASSWORD_ADMIN: z.string(),
   LOGIN_ADMIN: z.string(),
+  URI_API: z.string(),
 });
 
 export type Env = z.infer<typeof envSchema>;

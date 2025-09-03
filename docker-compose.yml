@@ -1,9 +1,18 @@
-version: "3.9"
-
 services:
+  api:
+    container_name: sso-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9196:3000"
+    restart: on-failure
+    depends_on:
+      - db
+
   db:
     image: postgres:15
-    container_name: sso
+    container_name: sso-db
     environment:
       POSTGRES_USER: sso
       POSTGRES_PASSWORD: sso

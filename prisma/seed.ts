@@ -7,7 +7,7 @@ async function main() {
   const client = await db.client.create({
     data: {
       name: "sso",
-      url: "http:localhost:3000"
+      url: process.env.URI_API!
     }
   })
 
