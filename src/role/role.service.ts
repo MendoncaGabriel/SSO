@@ -10,16 +10,16 @@ export class RoleService {
   ){}
 
   async create(data: CreateRoleDTO) {
-    const { roles } = await this.listByPermissionId(data.permissionId);
+    const existingRole = await this.db.role.findFirst({
+      where: {
+        action: data.action,
+        resource: data.resource,
+        permissionId: data.permissionId
+      }
+    });
 
-    const existingRules = roles.filter(e => {
-      e.action === data.action &&
-        e.permissionId === data.action &&
-        e.resource === data.action
-    })
-
-    if (existingRules.length !== 0) {
-      throw new ConflictException("This role already exists")
+    if (existingRole) {
+      throw new ConflictException("This role already exists");
     }
 
     const role = await this.db.role.create({
