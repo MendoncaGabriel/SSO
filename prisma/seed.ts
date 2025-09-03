@@ -17,7 +17,7 @@ async function main() {
     }
   })
 
-  const actions = ["read", "write", "delete"];
+  const actions = ["read", "write", "delete", "update"];
   const resources = ["user", "client", "permission", "role", "user-permission"];
 
   const rolesData = resources.flatMap(resource =>

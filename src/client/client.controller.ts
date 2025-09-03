@@ -21,16 +21,19 @@ export class ClientController {
     return await this.clientService.create(data);
   }
 
+  @Role('read:client')
   @Get()
   async list() {
     return await this.clientService.list();
   }
-
+  
+  @Role('read:client')
   @Get(":id")
   async findById(@Param() {id}: {id: string}) {
     return await this.clientService.findById(id);
   }
-
+  
+  @Role('update:client')
   @Patch(":id")
   async update(
     @Param() { id }: FindClientByIdDTO, 
@@ -38,7 +41,8 @@ export class ClientController {
   ) {
     return this.clientService.update(id, data)
   }
-
+  
+  @Role('delete:client')
   @Delete(":id")
   async delete(@Param() { id }: DeleteClientByIdDTO) {
     return await this.clientService.delete(id)
