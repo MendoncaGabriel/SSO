@@ -1,11 +1,13 @@
-import { Controller, Get, Post, Param, Patch, Body, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Param, Patch, Body, Delete, UseGuards } from '@nestjs/common';
 import { CreateClientDTO } from './dto/create.client';
 import { UpdateClientDTO } from './dto/update.client';
 import { FindClientByIdDTO } from './dto/findById.client';
 import { DeleteClientByIdDTO } from './dto/deleteclient';
 import { ClientService } from './client.service';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('client')
+@UseGuards(AuthGuard('jwt'))
 export class ClientController {
   constructor(
     private readonly clientService: ClientService
