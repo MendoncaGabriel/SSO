@@ -2,24 +2,23 @@ import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { UserAd } from 'src/@types/user';
 import jwt from 'jsonwebtoken';
-import { ConfigService } from '@nestjs/config';
 import { UserService } from '../user/user.service';
-import { PrismaService } from 'src/modules/prisma/prisma.service';
+import { EnvService } from '../env/env.service';
+import { LoginDTO } from './dto/login.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class LoginService {
   constructor(
-    private readonly config: ConfigService,
     private readonly userService: UserService,
-    private readonly db: PrismaService
+    private readonly db: PrismaService,
+    private env: EnvService
   ) {}
 
   async login(
-    {login, password, clientId}:
-    {login: string, password: string, clientId: string}
+    {login, password, clientId}: LoginDTO
   ){
-    const API_AD = this.config.get<string>("API_AD")!;
-    const JWT_SECRET = this.config.get<string>("JWT_SECRET")!;
+    const { API_AD, JWT_SECRET } = this.env.getAll();
     
     const { data } = await axios.post<UserAd | null>(API_AD, {
       username: login,

@@ -1,5 +1,4 @@
-import { Type } from "class-transformer";
-import { IsInt, Min, Max, IsString, Length, IsUUID } from "class-validator";
+import { IsString, Length, IsUUID } from "class-validator";
 
 export class LoginDTO {
   @IsString()
