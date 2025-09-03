@@ -5,14 +5,17 @@ import { FindClientByIdDTO } from './dto/findById.client';
 import { DeleteClientByIdDTO } from './dto/deleteclient';
 import { ClientService } from './client.service';
 import { AuthGuard } from '@nestjs/passport';
+import { RoleGuard } from 'src/guard/role.guard';
+import { Role } from 'src/decorators/role.decorator';
 
 @Controller('client')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(AuthGuard('jwt'), RoleGuard)
 export class ClientController {
   constructor(
     private readonly clientService: ClientService
   ){}
 
+  @Role('write:client')
   @Post()
   async create(@Body() data: CreateClientDTO) {
     return await this.clientService.create(data);
