@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
-import { UserAd } from 'src/@types/user';
+import { UserAd } from 'src/login/@types/user';
 import jwt from 'jsonwebtoken';
 import { UserService } from '../user/user.service';
 import { EnvService } from '../env/env.service';
