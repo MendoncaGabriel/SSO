@@ -1,6 +1,5 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { LoginService } from './login.service';
-import { UserAd } from 'src/login/@types/user';
 import { LoginDTO } from './dto/login.dto';
 
 @Controller('auth/login')
@@ -10,7 +9,7 @@ export class LoginController {
   @Post()
   login(
     @Body() body: LoginDTO
-  ): Promise<{ user: UserAd | null, token: string }> {
+  ): Promise<{ username: string; token: string; roles: string[] }> {
     return this.loginService.login(body);
   }
 }

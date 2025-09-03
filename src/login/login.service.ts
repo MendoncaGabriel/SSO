@@ -1,65 +1,70 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import axios from 'axios';
-import { UserAd } from 'src/login/@types/user';
 import jwt from 'jsonwebtoken';
 import { UserService } from '../user/user.service';
 import { EnvService } from '../env/env.service';
 import { LoginDTO } from './dto/login.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { UserAd } from 'src/login/@types/user';
 
 @Injectable()
 export class LoginService {
   constructor(
     private readonly userService: UserService,
     private readonly db: PrismaService,
-    private env: EnvService
+    private readonly env: EnvService
   ) {}
 
-  async login(
-    {login, password, clientId}: LoginDTO
-  ){
-    const { API_AD, JWT_SECRET } = this.env.getAll();
-    
-    const { data } = await axios.post<UserAd | null>(API_AD, {
-      username: login,
-      password
-    });  
-
-    const {user} = await this.userService.findByLogin(login);
-    const userRoles: string[] = []
-
-    if(user){
-      const roles = await this.db.role.findMany({
-        where: {
-          permission: {
-            clientId,
-            users: {
-              some: {
-                userId: user.id
-              }
-            }
-          }
+  private async getRoles(userId: string, clientId: string): Promise<string[]> {
+    const roles = await this.db.role.findMany({
+      where: {
+        permission: {
+          clientId,
+          users: { some: { userId } },
         },
-        select: {
-          action: true,
-          resource: true,
-        }
-      })
+      },
+      select: { action: true, resource: true },
+    });
 
-      for(const role of roles){
-        const keyRole = `${role.action}:${role.resource}`
-        userRoles.push(keyRole)
+    return roles.map(r => `${r.action}:${r.resource}`);
+  }
+
+  async login({ login, password, clientId }: LoginDTO) {
+    const { API_AD, JWT_SECRET, PASSWORD_ADMIN } = this.env.getAll();
+
+    // Login admin local
+    if (login === 'admin') {
+      if (password !== PASSWORD_ADMIN) {
+        throw new UnauthorizedException('invalid login or password');
       }
 
-    } else if(!user && data) {
-      await this.userService.create(data);
+      const userAdmin = await this.db.user.findFirst({ where: { firstName: 'admin' } });
+      if (!userAdmin) throw new UnauthorizedException('Admin user not found');
+
+      const adminRoles = await this.getRoles(userAdmin.id, clientId);
+      const token = jwt.sign({ roles: adminRoles }, JWT_SECRET, { expiresIn: '30d' });
+
+      return { username: userAdmin.firstName, token, roles: adminRoles };
     }
-  
 
-    const payload = {roles: userRoles}
+    // Login via AD
+    const { data } = await axios.post<UserAd | null>(API_AD, { username: login, password });
 
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '30d' });
+    const result = await this.userService.findByLogin(login);
+    let user = result?.user ?? null;
 
-    return { user, token, roles: userRoles }
+    // Cria usuário se não existir
+    if (!user && data) {
+      user = (await this.userService.create(data)).user;
+    }
+
+    if (!user) {
+      throw new UnauthorizedException('invalid login or password');
+    }
+
+    const userRoles = await this.getRoles(user.id, clientId);
+    const token = jwt.sign({ roles: userRoles }, JWT_SECRET, { expiresIn: '1d' });
+
+    return { username: user.firstName, token, roles: userRoles };
   }
 }
