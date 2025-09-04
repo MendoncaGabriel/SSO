@@ -34,7 +34,7 @@ export class RoleController {
   
   
   @Role('read:role')
-  @Get(":permissionId")
+  @Get("permission/:permissionId")
   async listByPermissionId(@Param() {permissionId}: {permissionId: string}){
     return await this.roleService.listByPermissionId(permissionId)
   }

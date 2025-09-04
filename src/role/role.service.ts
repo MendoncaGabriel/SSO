@@ -29,18 +29,58 @@ export class RoleService {
   }
 
   async update(id: string, data: UpdateRoleDTO) {
-    const role = await this.db.role.update({
-      where: {
-        id
-      },
-      data: {
-        ...(data.action ? { action: data.action } : {}),
-        ...(data.resource ? { resource: data.resource } : {}),
-        ...(data.permissionId ? { permissionId: data.permissionId } : {})
-      }
-    })
+    const roleExists = await this.db.role.findUnique({
+      where: { id },
+    });
 
-    return { role }
+    if (!roleExists) {
+      throw new NotFoundException("Role not found");
+    }
+
+    if (data.permissionId) {
+      const permissionExists = await this.db.permission.findUnique({
+        where: { id: data.permissionId },
+      });
+
+      if (!permissionExists) {
+        throw new NotFoundException("Permission not found");
+      }
+    }
+
+    const duplicateRole = await this.db.role.findFirst({
+      where: {
+        action: data.action,
+        resource: data.resource,
+        permissionId: data.permissionId,
+        NOT: { id },
+      },
+    });
+
+    if (duplicateRole) {
+      throw new ConflictException(
+        "A role with this action already exists for this resource for this permission"
+      );
+    }
+
+    try {
+      const role = await this.db.role.update({
+        where: { id },
+        data: {
+          ...(data.action ? { action: data.action } : {}),
+          ...(data.resource ? { resource: data.resource } : {}),
+          ...(data.permissionId ? { permissionId: data.permissionId } : {}),
+        },
+      });
+
+      return { role };
+    } catch (error: any) {
+      if (error.code === "P2003") {
+        throw new ConflictException(
+          "Invalid foreign key: the specified permission does not exist"
+        );
+      }
+      throw error;
+    }
   }
 
   async getById(id: string) {

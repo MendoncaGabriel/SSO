@@ -46,15 +46,28 @@ export class PermissionService {
     return { permission }
   }
 
-  async delete(id: string){
-    const {permission : permissionExists} = await this.getById(id);
-    if(!permissionExists){
-      throw new NotFoundException("Permission not found")
+  async delete(id: string) {
+    const permission = await this.db.permission.findUnique({
+      where: { id },
+    });
+
+    if (!permission) {
+      throw new NotFoundException("Permission not found");
     }
 
-    const relatedRules = await this.db.role.count();
-    if(relatedRules !== 0){
-      throw new ConflictException("There are rules related to this permission, delete the roles first before deleting this permission")
+    // Se Role → Permission for 1:1
+    const relatedRoles = await this.db.role.count({
+      where: {
+        permission: {
+          id
+        }
+      }
+    });
+
+    if (relatedRoles > 0) {
+      throw new ConflictException(
+        "There are roles related to this permission, delete the roles first before deleting this permission"
+      );
     }
 
     const relatedUserPermissions = await this.db.userPermission.count({
@@ -67,36 +80,48 @@ export class PermissionService {
       );
     }
 
-
-    const permission = await this.db.permission.delete({
-      where: {
-        id
+    try {
+      const deleted = await this.db.permission.delete({
+        where: { id }
+      });
+      return { permission: deleted };
+    } catch (error: any) {
+      if (error.code === "P2003") {
+        throw new ConflictException(
+          "Permission cannot be deleted because it is still referenced"
+        );
       }
-    })
-    return { permission }
+      throw error;
+    }
   }
 
   async update(id: string, data: UpdatePermissionDTO){
+    const client = await this.db.client.findUnique({
+      where: {
+        id: data.clientId
+      }
+    })
+    if(!client){
+      throw new NotFoundException("Client not found")
+    }
+
     const permissionExists = await this.db.permission.findUnique({
       where: {
         id
       }
     })
+    if(!permissionExists){
+      throw new NotFoundException("Permission not found")
+    }
 
     const checkNameAndClientId = await this.db.permission.findFirst({
       where: {
-        AND: {
-          name: data.name,
-          clientId: data.clientId
-        }
+        name: data.name,
+        clientId: data.clientId
       }
     })
     if(checkNameAndClientId){
       throw new ConflictException("Permission already exists")
-    }
-
-    if(!permissionExists){
-      throw new NotFoundException("Permission not found")
     }
 
     const permission = await this.db.permission.update({
