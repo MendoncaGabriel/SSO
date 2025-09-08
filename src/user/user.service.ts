@@ -28,12 +28,9 @@ export class UserService {
     return {user}
   }
 
-  async create(body:{login: string, password: string}){
-    
+  async create(data: CreateUserDTO){
     const user = await this.db.user.create({
-      data: {
-        
-      }
+      data
     })
     return {user}
   }

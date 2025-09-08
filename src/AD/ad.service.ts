@@ -8,14 +8,21 @@ export class AdService {
   constructor(
     private readonly env: EnvService
   ){}
-  async login(user: {login: string, passport: string}){
+  async login(user: {login: string, password: string}): Promise<UserAd | null>{
     const { API_AD } = this.env.getAll();
     const requestBody = {
       userName: user.login,
-      password: user.passport
+      password: user.password
     }
 
-    const { data } = await axios.post<UserAd | null>(API_AD, requestBody);
-    return data    
+    try {
+      const { data } = await axios.post<UserAd | null>(API_AD, requestBody);
+      if(!data) return null
+      return data
+      
+    } catch (error) {
+      console.log(error)
+    }
+    return null
   }
 }
