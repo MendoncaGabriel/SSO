@@ -28,10 +28,30 @@ export class UserService {
     return {user}
   }
 
-  async create(data: CreateUserDTO){
+  async create(body:{login: string, password: string}){
+    
     const user = await this.db.user.create({
-      data
+      data: {
+        
+      }
     })
     return {user}
+  }
+
+  async listUsersByClientId(clientId: string){
+    const _users = await  this.db.user.findMany({
+      where: {
+        permissions: {
+          some: {
+            permission: {
+              clientId
+            }
+          }
+        }
+      }
+    });
+
+    const users = _users.filter(e => e.firstName !== "" && e.email !== "");
+    return users
   }
 }
