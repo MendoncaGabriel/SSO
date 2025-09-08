@@ -1,11 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDTO } from 'src/auth/dto/create.user.dto';
+import { AdService } from 'src/AD/ad.service';
 
 @Injectable()
 export class UserService {
   constructor(
-    private readonly db: PrismaService
+    private readonly db: PrismaService,
+    private readonly ad: AdService
   ){}
 
   async findByLogin(login: string){
@@ -28,11 +30,17 @@ export class UserService {
     return {user}
   }
 
-  async create(data: CreateUserDTO){
-    const user = await this.db.user.create({
-      data
-    })
-    return {user}
+  async create(
+    {login, password}:
+    {login: string, password: string}
+  ){
+    const userAd = await this.ad.login({login, password});
+    if(userAd){
+      const user = await this.db.user.create({
+        data: userAd
+      })
+      return {user}
+    }
   }
 
   async listUsersByClientId(clientId: string){
