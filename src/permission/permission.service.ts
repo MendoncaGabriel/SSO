@@ -29,6 +29,13 @@ export class PermissionService {
     const permissions = await this.db.permission.findMany({
       where: {
         clientId
+      },
+      include: {
+        client: {
+          select: {
+            name: true
+          }
+        }
       }
     })
     return { permissions }

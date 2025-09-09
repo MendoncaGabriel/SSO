@@ -31,9 +31,8 @@ export class AdService {
     }
   }
 
-
   async GetUserProperties(login: string) {
-    const url = "http://brmanm1appc1/AD.Api.Americas.Man/api/Users/GetUserProperties";
+    const url = "http://10.56.17.58/AD.Api.Americas.Man/api/Users/GetUserProperties";
     try {
       const { data } = await axios.post(
         url,
@@ -54,6 +53,4 @@ export class AdService {
       }
     }
   }
-
-
 }
