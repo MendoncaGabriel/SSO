@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import axios from 'axios';
 import { AxiosError } from "axios";
 import { UserAd } from "src/auth/@types/user";
@@ -14,14 +14,14 @@ export class AdService {
     user:
       { login: string, password: string }
   ): Promise<UserAd | null> {
-    const { API_AD } = this.env.getAll();
+    const url = "http://10.56.17.58/AD.Api.Americas.Man/api/Users/ValidateAuthentication";
     const requestBody = {
       userName: user.login,
       password: user.password
     }
 
     try {
-      const { data } = await axios.post<UserAd | null>(API_AD, requestBody);
+      const { data } = await axios.post<UserAd | null>(url, requestBody);
       if (!data) return null
       return data
 
