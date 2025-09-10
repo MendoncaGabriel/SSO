@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { UserPermissionService } from './user-permission.service';
+import { PermissionResponse, UserPermissionService } from './user-permission.service';
 import { CreateUserPermissionDTO } from './dto/create.user-permission.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { RoleGuard } from 'src/guard/role.guard';
@@ -18,7 +18,7 @@ export class UserPermissionController {
   
   @Role('read:user-permission')
   @Get()
-  async list(){
+  async list(): Promise<{userPermission: PermissionResponse[]}>{
     return await this.userPermissionService.list();
   }
   

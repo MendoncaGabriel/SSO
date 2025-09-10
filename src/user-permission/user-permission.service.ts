@@ -2,6 +2,21 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { CreateUserPermissionDTO } from './dto/create.user-permission.dto';
 import { PrismaService } from '../prisma/prisma.service';
 
+export interface PermissionResponse {
+  user: {
+    id: string;
+    fullName: string;
+  },
+  permission: {
+    id: string;
+    name: string;
+  },
+  client: {
+    id: string;
+    name: string;
+  }
+}
+
 @Injectable()
 export class UserPermissionService {
   constructor(
@@ -43,8 +58,51 @@ export class UserPermissionService {
     return { userPermission }
   }
 
-  async list(){
-    const userPermission = await this.db.userPermission.findMany();
+  async list(): Promise<{userPermission: PermissionResponse[]}>{
+    const _userPermission = await this.db.userPermission.findMany({
+      select: {
+        user: {
+          select: {
+            id: true,
+            fullName: true
+          }
+        },
+        permission: {
+          select: {
+            id: true,
+            name: true,
+            client: {
+              select: {
+                id: true,
+                name: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    const userPermission: PermissionResponse[] = [];
+
+    for(const e of _userPermission){
+      const userPermissionItem: PermissionResponse = {
+        user: {
+          id: e.user.id,
+          fullName: e.user.fullName
+        },
+        permission: {
+          id: e.permission.id,
+          name: e.permission.name
+        },
+        client: {
+          id: e.permission.client.id,
+          name: e.permission.client.name
+        }
+      }
+      userPermission.push(userPermissionItem)
+    }
+    
+
     return { userPermission }
   }
 
