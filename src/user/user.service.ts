@@ -69,9 +69,12 @@ export class UserService {
   }
 
   async listUsers() {
-    const _users = await this.db.user.findMany();
+    const users = await this.db.user.findMany({
+      orderBy: {
+        fullName: "asc"
+      }
+    });
 
-    const users = _users.filter(e => e.firstName !== "" && e.email !== "");
     return users
   }
 }

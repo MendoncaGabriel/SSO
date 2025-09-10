@@ -43,7 +43,7 @@ async function main() {
       email: "",
       employeeNum: "",
       firstName: LOGIN_ADMIN,
-      fullName: "",
+      fullName: LOGIN_ADMIN,
       lastName: "",
       location: "",
       manager: "",

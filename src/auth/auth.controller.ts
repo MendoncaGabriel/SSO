@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post, Query, Req, UnauthorizedException } from '@nestjs/common';
 import { LoginDTO } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
@@ -17,26 +17,39 @@ export class AuthController {
     return this.authService.login(body);
   }
 
-  
-  @Get('verify')
-  verifyToken(@Req() req: Request) {
+    
+  @Post('verify')
+  @HttpCode(200)
+  verifyToken(@Req() req: Request, @Body() { roles }: { roles: string[] }) {
     const authHeader = req.headers['authorization'];
     if (!authHeader) {
-      return { valid: false, message: 'No token provided' };
+      throw new UnauthorizedException('No token provided');
     }
 
     const [type, token] = authHeader.split(' ');
     if (type !== 'Bearer' || !token) {
-      return { valid: false, message: 'Invalid token format' };
+      throw new UnauthorizedException('Invalid token format');
     }
 
     try {
-      const payload = this.jwtService.verify(token, {
+      const payload: any = this.jwtService.verify(token, {
         secret: process.env.JWT_SECRET!,
       });
-      return { valid: true, payload };
+
+      // Verifica se todas as roles do body estão no payload.roles
+      const tokenRoles: string[] = payload.roles || [];
+      const allRolesValid = roles.every(role => tokenRoles.includes(role));
+
+      if (!allRolesValid) {
+        throw new UnauthorizedException('User not authorized for all required roles');
+      }
+
+      return { message: 'authenticated and authorized user' };
     } catch (e) {
-      return { valid: false, message: 'Token expired or invalid' };
+      // token expirado ou inválido
+      throw new UnauthorizedException('Token expired or invalid');
     }
   }
+
+
 }
