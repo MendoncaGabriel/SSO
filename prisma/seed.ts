@@ -31,7 +31,6 @@ async function main() {
 
   const roles = await db.role.createMany({
     data: rolesData,
-    skipDuplicates: true,
   });
 
   const LOGIN_ADMIN = process.env.LOGIN_ADMIN as string;

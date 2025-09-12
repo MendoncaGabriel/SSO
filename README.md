@@ -1,7 +1,9 @@
 docker compose up -d --build
 
-docker compose exec api NODE_TLS_REJECT_UNAUTHORIZED=0 npx prisma db pull
+ou 
 
-docker compose exec api NODE_TLS_REJECT_UNAUTHORIZED=0 npx prisma generate
 
-docker compose exec api NODE_TLS_REJECT_UNAUTHORIZED=0 npm run seed
+npm install
+npm run setup 
+npm run build
+npm start
